@@ -1,0 +1,22 @@
+# Development files
+example/
+test/
+bower.json
+type-test.ts
+
+# IDE and OS files
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Node modules
+node_modules/
+
+# Git files
+.git/
+.gitignore
+
+# Publishing guides
+PUBLISH.md
