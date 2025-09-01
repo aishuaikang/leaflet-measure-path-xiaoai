@@ -50,7 +50,62 @@ polygon.showMeasurements({
 });
 
 // 测试 Circle 的测量功能
-const circle = L.circle([51.508, -0.11], {
+const circle = L.circle([51.508, -0.11], 500);
+
+// 测试圆形的测量选项，包括新的 showRadius 功能
+circle.showMeasurements({
+    showOnHover: false,
+    showArea: true,
+    showRadius: true,
+    imperial: false,
+    formatDistance: (distance: number) => `${distance.toFixed(1)} 米`,
+    formatArea: (area: number) => `${area.toFixed(1)} 平方米`,
+    lang: {
+        totalArea: "总面积",
+        radius: "半径",
+    },
+});
+
+// 测试圆形的方法
+circle.hideMeasurements();
+circle.updateMeasurements();
+
+// 测试 Marker.Measurement 类
+const measurement = L.marker.measurement(
+    [51.505, -0.09],
+    "100 m",
+    "距离测量",
+    0,
+    { pane: "markerPane" }
+);
+
+// 测试构造函数选项
+const polylineWithOptions = L.polyline(
+    [
+        [51.505, -0.09],
+        [51.51, -0.1],
+    ],
+    {
+        showMeasurements: true,
+        measurementOptions: {
+            showRadius: true, // 测试新增的选项
+            lang: {
+                radius: "半径",
+            },
+        },
+    }
+);
+
+const circleWithOptions = L.circle([51.508, -0.11], 500, {
+    showMeasurements: true,
+    measurementOptions: {
+        showArea: true,
+        showRadius: true,
+    },
+});
+
+// 测试另一个圆形配置
+const anotherCircle = L.circle([51.508, -0.11], {
     radius: 500,
     showMeasurements: true,
     measurementOptions: {

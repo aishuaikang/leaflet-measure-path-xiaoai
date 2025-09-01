@@ -204,13 +204,17 @@
             this.options.measurementOptions &&
             this.options.measurementOptions.showOnHover;
         if (this.options.showMeasurements && !showOnHover) {
-            this.showMeasurements();
+            this.showMeasurements(this.options.measurementOptions);
         }
         if (this.options.showMeasurements && showOnHover) {
-            this.on("mouseover", function () {
-                this.showMeasurements();
+            // 先移除可能存在的事件监听器，避免重复绑定
+            this.off("mouseover.measurement");
+            this.off("mouseout.measurement");
+
+            this.on("mouseover.measurement", function () {
+                this.showMeasurements(this.options.measurementOptions);
             });
-            this.on("mouseout", function () {
+            this.on("mouseout.measurement", function () {
                 this.hideMeasurements();
             });
         }
@@ -239,7 +243,17 @@
 
     L.Polyline.include({
         showMeasurements: function (options) {
-            if (!this._map || this._measurementLayer) return this;
+            if (!this._map) return this;
+
+            // 如果测量层已存在但不在地图上，先清理它
+            if (
+                this._measurementLayer &&
+                !this._map.hasLayer(this._measurementLayer)
+            ) {
+                this._measurementLayer = null;
+            }
+
+            if (this._measurementLayer) return this;
 
             this._measurementOptions = L.extend(
                 {
@@ -280,10 +294,16 @@
         onAdd: override(
             L.Polyline.prototype.onAdd,
             function (originalReturnValue) {
-                var showOnHover =
-                    this.options.measurementOptions &&
-                    this.options.measurementOptions.showOnHover;
-                if (this.options.showMeasurements && !showOnHover) {
+                // 调用 addInitHook 逻辑以确保测量功能正确初始化
+                addInitHook.call(this);
+
+                // 如果之前有测量选项，强制重新显示测量
+                if (this._measurementOptions && !this._measurementLayer) {
+                    this.showMeasurements(this._measurementOptions);
+                }
+
+                // 额外检查：如果原本应该显示测量但没有，强制显示
+                if (this.options.showMeasurements && !this._measurementLayer) {
                     this.showMeasurements(this.options.measurementOptions);
                 }
 
@@ -426,7 +446,17 @@
 
     L.Circle.include({
         showMeasurements: function (options) {
-            if (!this._map || this._measurementLayer) return this;
+            if (!this._map) return this;
+
+            // 如果测量层已存在但不在地图上，先清理它
+            if (
+                this._measurementLayer &&
+                !this._map.hasLayer(this._measurementLayer)
+            ) {
+                this._measurementLayer = null;
+            }
+
+            if (this._measurementLayer) return this;
 
             this._measurementOptions = L.extend(
                 {
@@ -452,7 +482,7 @@
         hideMeasurements: function () {
             if (!this._map) return this;
 
-            this._map.on("zoomend", this.updateMeasurements, this);
+            this._map.off("zoomend", this.updateMeasurements, this);
 
             if (!this._measurementLayer) return this;
             this._map.removeLayer(this._measurementLayer);
@@ -464,10 +494,16 @@
         onAdd: override(
             L.Circle.prototype.onAdd,
             function (originalReturnValue) {
-                var showOnHover =
-                    this.options.measurementOptions &&
-                    this.options.measurementOptions.showOnHover;
-                if (this.options.showMeasurements && !showOnHover) {
+                // 调用 addInitHook 逻辑以确保测量功能正确初始化
+                addInitHook.call(this);
+
+                // 如果之前有测量选项，强制重新显示测量
+                if (this._measurementOptions && !this._measurementLayer) {
+                    this.showMeasurements(this._measurementOptions);
+                }
+
+                // 额外检查：如果原本应该显示测量但没有，强制显示
+                if (this.options.showMeasurements && !this._measurementLayer) {
                     this.showMeasurements(this.options.measurementOptions);
                 }
 
@@ -545,10 +581,13 @@
 
                 // 如果同时显示半径和面积，将半径标签稍微偏移，避免重叠
                 if (options.showArea) {
-                    var offsetLatLng = L.latLng(
-                        latLng.lat - (radius / 111320) * 0.3,
-                        latLng.lng
+                    // 使用地图投影计算偏移，更准确
+                    var center = this._map.project(latLng);
+                    var offsetPoint = L.point(
+                        center.x,
+                        center.y + Math.min(radius * 0.3, 50)
                     );
+                    var offsetLatLng = this._map.unproject(offsetPoint);
                     radiusMeasurement._latlng = offsetLatLng;
                 }
 
