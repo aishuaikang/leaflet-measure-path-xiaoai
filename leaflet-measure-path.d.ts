@@ -48,19 +48,32 @@ declare module "leaflet" {
     }
 
     interface MeasurementOptions {
+        /** Show measurements only on hover */
         showOnHover?: boolean;
+        /** Minimum pixel distance between measurement labels */
         minPixelDistance?: number;
+        /** Show distance measurements on polyline segments */
         showDistances?: boolean;
+        /** Show area measurements for polygons and circles */
         showArea?: boolean;
+        /** Show radius measurements for circles */
+        showRadius?: boolean;
+        /** Show total distance for polylines */
         showTotalDistance?: boolean;
+        /** Use imperial units (feet, miles, acres) instead of metric */
         imperial?: boolean;
+        /** Use hectares for area measurements */
         ha?: boolean;
+        /** Custom formatter function for distance measurements */
         formatDistance?: (distance: number) => string;
+        /** Custom formatter function for area measurements */
         formatArea?: (area: number) => string;
+        /** Localization strings */
         lang?: {
             totalLength?: string;
             totalArea?: string;
             segmentLength?: string;
+            radius?: string;
         };
     }
 
@@ -69,7 +82,12 @@ declare module "leaflet" {
         measurementOptions?: MeasurementOptions;
     }
 
-    interface CircleMarkerOptions {
+    interface CircleOptions {
+        showMeasurements?: boolean;
+        measurementOptions?: MeasurementOptions;
+    }
+
+    interface PolygonOptions {
         showMeasurements?: boolean;
         measurementOptions?: MeasurementOptions;
     }
@@ -87,10 +105,16 @@ declare module "leaflet" {
     }
 
     interface Circle {
+        /** Show measurements on the circle */
         showMeasurements(options?: MeasurementOptions): this;
+        /** Hide measurements from the circle */
         hideMeasurements(): this;
+        /** Update measurement display */
         updateMeasurements(): void;
+        /** Format area value for display */
         formatArea(area: number): string;
+        /** Format distance value for display (used for radius) */
+        formatDistance(distance: number): string;
 
         _measurementOptions?: MeasurementOptions;
         _measurementLayer?: L.LayerGroup;
