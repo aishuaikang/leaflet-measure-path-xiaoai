@@ -1,6 +1,6 @@
 {
     "name": "leaflet-measure-path-xiaoai",
-    "version": "1.5.0",
+    "version": "1.5.2",
     "description": "在Leaflet路径上显示测量值",
     "main": "leaflet-measure-path.js",
     "types": "leaflet-measure-path.d.ts",
